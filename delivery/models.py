@@ -64,4 +64,4 @@ class DeliveryStop(models.Model):
 
 
     def __str__(self):
-        return f"{self.order.address}"
+        return f"{self.order.customer_name}"
