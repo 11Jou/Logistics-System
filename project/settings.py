@@ -27,6 +27,16 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_RENDERER_CLASSES': [
+        'Utils.CustomResponse.CustomJSONRenderer',
+    ],
+    'EXCEPTION_HANDLER': 'Utils.CustomResponse.custom_exception_handler',
+}
+
 
 # Application definition
 
