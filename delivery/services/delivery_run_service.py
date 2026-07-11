@@ -96,3 +96,35 @@ def complete_run(user, run_id):
         driver.save(update_fields=['status'])
 
     return run
+
+@transaction.atomic
+def cash_banked_run(run_id):
+    try:
+        run = DeliveryRun.objects.prefetch_related(
+            'deliverystop_set__order',
+        ).get(pk=run_id)
+    except DeliveryRun.DoesNotExist:
+        raise Exception('Delivery run not found')
+
+    if run.status != DeleveryRunStatus.COMPLETED:
+        raise Exception('Delivery run must be in completed status')
+
+    for stop in run.deliverystop_set.all():
+        if stop.stop_status == DeleveryStopStatus.FAILED:
+            continue
+
+        if stop.stop_status != DeleveryStopStatus.DELIVERED:
+            raise Exception('All delivery stops must be delivered or failed before cash banking')
+
+        if stop.order.status != OrderStatus.DELIVERED:
+            raise Exception('Delivered stops must have orders in delivered status before cash banking')
+
+        stop.order.status = OrderStatus.CASH_BANKED
+        stop.order.save(update_fields=['status'])
+
+    run.status = DeleveryRunStatus.CASH_BANKED
+    run.cash_banked_at = timezone.now()
+    run.save(update_fields=['status', 'cash_banked_at'])
+
+    return run
+

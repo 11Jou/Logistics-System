@@ -8,6 +8,7 @@ urlpatterns = [
     path('build-run/', BuildDeliveryRunView.as_view(), name='build-delivery-run'),
     path('runs/', DeliveryRunListView.as_view(), name='delivery-run-list'),
     path('runs/<int:pk>/start/', DeliveryRunStartView.as_view(), name='delivery-run-start'),
+    path('runs/<int:pk>/cash-banked/', DeliveryRunCashBankedView.as_view(), name='delivery-run-cash-banked'),
 
 
     # Driver actions
@@ -16,7 +17,5 @@ urlpatterns = [
     path('runs/driver/<int:pk>/stops/<int:stop_pk>/start/', DriverDeliveryStopStartView.as_view(), name='driver-delivery-stop-start'),
     path('runs/driver/<int:pk>/stops/<int:stop_pk>/delivered/', DriverDeliveryStopDeliveredView.as_view(), name='driver-delivery-stop-delivered'),
     path('runs/driver/<int:pk>/stops/<int:stop_pk>/failed/', DriverDeliveryStopFailedView.as_view(), name='driver-delivery-stop-failed'),
-
-    #Driver or dispatcher actions
     path('runs/driver/<int:pk>/complete/', DriverDeliveryRunCompleteView.as_view(), name='driver-delivery-run-complete'),
 ]

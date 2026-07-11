@@ -32,6 +32,7 @@ class DeliveryRunListView(ListAPIView):
 class BuildDeliveryRunView(APIView):
     permission_classes = [IsManagerOrDispatcher]
 
+    @swagger_auto_schema(request_body=BuildDeliveryRunSerializer)
     def post(self, request, *args, **kwargs):
         serializer = BuildDeliveryRunSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -68,6 +69,23 @@ class DeliveryRunStartView(APIView):
             status=200,)
 
 
+class DeliveryRunCashBankedView(APIView):
+    permission_classes = [IsManagerOrDispatcher]
+
+    def put(self, request, *args, **kwargs):
+        try:
+            run = delivery_run_service.cash_banked_run(run_id=kwargs['pk'])
+        except Exception as exc:
+            return CustomResponse.error(
+                message=str(exc),
+                error={'detail': str(exc)},
+                status=400,
+            )
+        return CustomResponse.success(
+            message='Delivery run cash banked',
+            data=DeliveryRunSerializer(run).data,
+            status=200,
+        )
 
 class DriverDeliveryRunListView(ListAPIView):
     queryset = DeliveryRun.objects.all().select_related('driver').order_by('-start_date')
