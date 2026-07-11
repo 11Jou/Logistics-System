@@ -41,7 +41,7 @@ class BuildDeliveryRunView(APIView):
             run = delivery_run_service.build_run(serializer.validated_data['driver_id'])
         except Exception as exc:
             return CustomResponse.error(
-                message='Driver is not available',
+                message=str(exc),
                 error={'driver_id': str(exc)},
                 status=400,)
 

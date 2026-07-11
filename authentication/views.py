@@ -1,8 +1,7 @@
+from django.shortcuts import render
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from .serializers import CustomTokenObtainPairSerializer, CustomTokenRefreshSerializer
-from rest_framework import status
-from rest_framework.exceptions import AuthenticationFailed
 
+from .serializers import CustomTokenObtainPairSerializer, CustomTokenRefreshSerializer
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -11,3 +10,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
 class CustomTokenRefreshView(TokenRefreshView):
     serializer_class = CustomTokenRefreshSerializer
+
+
+def login_page(request):
+    return render(request, 'login.html')

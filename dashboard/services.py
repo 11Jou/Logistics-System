@@ -27,7 +27,7 @@ def get_dashboard_stats():
             active=True,
         ).exclude(status=DriverStatus.IN_ACTIVE).count(),
         'total_runs_drivers': DeliveryRun.objects.filter(
-            status=DeleveryRunStatus.COMPLETED,
+            status__in=[DeleveryRunStatus.COMPLETED, DeleveryRunStatus.CASH_BANKED],
         ).count(),
         'total_cash_today': total_cash_today or 0,
     }

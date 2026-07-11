@@ -13,6 +13,7 @@ Django REST API for managing logistics operations: authentication, orders, drive
 - **Run lifecycle** — start run → driver processes stops in sequence → complete run → cash bank
 - **Stop workflow** — start (`en_route`), mark delivered, or fail (with required reason)
 - **Role-based access** — managers/dispatchers manage runs; drivers act on their own runs/stops
+- **Web UI** — login page and operations dashboard (stats, drivers list, build run)
 - **Standardized API responses** — `{ success, message, data, error, status }`
 - **Swagger docs** — interactive API documentation at `/swagger/`
 
@@ -53,7 +54,6 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-
 ### 3. Configure environment
 
 ```bash
@@ -73,19 +73,40 @@ DEBUG=True
 python manage.py migrate
 ```
 
-### 5. Start the server
+### 5. Collect static files
+
+```bash
+python manage.py collectstatic
+```
+
+> Required in production to serve static files. In local `runserver` development, Django can serve files from `STATICFILES_DIRS` without this step.
+
+### 6. Start the server
 
 ```bash
 python manage.py runserver
 ```
 
-- API base: `http://127.0.0.1:8000/api/v1/`
-- Swagger UI: `http://127.0.0.1:8000/swagger/`
-- Admin: `http://127.0.0.1:8000/admin/`
+---
 
-### Auth header
+## Web UI
 
-After login, send:
+| Page | URL | Description |
+|------|-----|-------------|
+| Login | [http://127.0.0.1:8000/login/](http://127.0.0.1:8000/login/) | Sign in with email/password; stores JWT tokens in `localStorage` |
+| Dashboard | [http://127.0.0.1:8000/dashboard/](http://127.0.0.1:8000/dashboard/) | Operations overview, driver list with status filter, and **Build run** |
+
+Other useful URLs:
+
+| Resource | URL |
+|----------|-----|
+| API base | `http://127.0.0.1:8000/api/v1/` |
+| Swagger UI | `http://127.0.0.1:8000/swagger/` |
+| Admin | `http://127.0.0.1:8000/admin/` |
+
+### Auth header (API clients)
+
+After login (UI or API), send:
 
 ```http
 Authorization: Bearer <access_token>
@@ -101,17 +122,19 @@ Authorization: Bearer <access_token>
 | Dispatcher | `dispatcher1@gmail.com` | `test@1234` |
 | Driver | `driver1@gmail.com` | `test@1234` |
 
-**Login**
+**API login example**
 
 ```http
 POST /api/v1/auth/login/
 Content-Type: application/json
 
 {
-  "email": "dispatcher@demo.com",
-  "password": "Demo@1234"
+  "email": "dispatcher1@gmail.com",
+  "password": "test@1234"
 }
 ```
+
+Or open the web login page and use the same credentials.
 
 ---
 
@@ -123,6 +146,12 @@ Content-Type: application/json
 |--------|----------|-------------|
 | POST | `/login/` | Obtain JWT access + refresh tokens |
 | POST | `/refresh/` | Refresh access token |
+
+### Dashboard API — `/api/v1/dashboard/` (manager / dispatcher)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/` | Dashboard statistics |
 
 ### Orders — `/api/v1/order/` (manager / dispatcher)
 
@@ -137,7 +166,7 @@ Content-Type: application/json
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/drivers/` | List drivers |
+| GET | `/drivers/` | List drivers (`?status=`) |
 | POST | `/build-run/` | Build run `{ "driver_id": <id> }` |
 | GET | `/runs/` | List all runs |
 | POST | `/runs/<id>/start/` | Start run (`en_route`) |

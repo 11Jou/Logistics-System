@@ -49,6 +49,8 @@ def build_run(driver_id):
         .filter(status=OrderStatus.OPEN)
         .order_by('created_at')[:driver.max_stops]
     )
+    if len(selected_orders) == 0:
+        raise Exception('No orders found')
 
     ordered_orders = _sequence_by_priority(selected_orders)
 
@@ -78,6 +80,7 @@ def build_run(driver_id):
     return run
 
 
+@transaction.atomic
 def complete_run(user, run_id):
     driver = get_driver_for_user(user)
     run = get_driver_run(driver, run_id)
@@ -87,13 +90,12 @@ def complete_run(user, run_id):
 
     _validate_all_stops_finished(run)
 
-    with transaction.atomic():
-        run.status = DeleveryRunStatus.COMPLETED
-        run.completed_at = timezone.now()
-        run.save(update_fields=['status', 'completed_at'])
+    run.status = DeleveryRunStatus.COMPLETED
+    run.completed_at = timezone.now()
+    run.save(update_fields=['status', 'completed_at'])
 
-        driver.status = DriverStatus.AVAILABLE
-        driver.save(update_fields=['status'])
+    driver.status = DriverStatus.AVAILABLE
+    driver.save(update_fields=['status'])
 
     return run
 

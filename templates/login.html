@@ -1,0 +1,124 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login · Logistic System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Sora:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="login-page">
+  <main class="login">
+    <h1 class="brand">Logistic System</h1>
+    <p class="subtitle">Sign in to manage orders, drivers, and delivery runs.</p>
+
+    <form id="login-form" novalidate>
+      <label>
+        Email
+        <input
+          type="email"
+          id="email"
+          name="email"
+          autocomplete="username"
+          placeholder="you@company.com"
+          required
+        >
+      </label>
+
+      <label>
+        Password
+        <input
+          type="password"
+          id="password"
+          name="password"
+          autocomplete="current-password"
+          placeholder="Enter your password"
+          required
+        >
+      </label>
+
+      <div id="error" class="error" role="alert"></div>
+
+      <button type="submit" id="submit-btn">Sign in</button>
+    </form>
+
+    <p class="hint">Use your email and password to continue.</p>
+  </main>
+
+  <script>
+    const form = document.getElementById("login-form");
+    const errorBox = document.getElementById("error");
+    const submitBtn = document.getElementById("submit-btn");
+
+    if (localStorage.getItem("access_token")) {
+      window.location.href = "/dashboard/";
+    }
+
+    function showError(message) {
+      errorBox.textContent = message;
+      errorBox.classList.add("show");
+    }
+
+    function clearError() {
+      errorBox.textContent = "";
+      errorBox.classList.remove("show");
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      clearError();
+
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+
+      if (!email || !password) {
+        showError("Please enter both email and password.");
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Signing in...";
+
+      try {
+        const response = await fetch("/api/v1/auth/login/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const payload = await response.json();
+        const data = payload.data || payload;
+        const message =
+          payload.message ||
+          (payload.error && (payload.error.detail || Object.values(payload.error)[0])) ||
+          "Login failed. Please try again.";
+
+        if (!response.ok || payload.success === false) {
+          throw new Error(typeof message === "string" ? message : "Invalid credentials");
+        }
+
+        if (!data.access) {
+          throw new Error("Login succeeded but no access token was returned.");
+        }
+
+        localStorage.setItem("access_token", data.access);
+        if (data.refresh) localStorage.setItem("refresh_token", data.refresh);
+        if (data.full_name) localStorage.setItem("full_name", data.full_name);
+        if (data.role) localStorage.setItem("role", data.role);
+
+        window.location.href = "/dashboard/";
+      } catch (error) {
+        showError(error.message || "Unable to sign in.");
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Sign in";
+      }
+    });
+  </script>
+</body>
+</html>

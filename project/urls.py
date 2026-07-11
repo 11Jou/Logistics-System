@@ -20,6 +20,9 @@ from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from rest_framework import permissions
 
+from authentication.views import login_page
+from dashboard.views import dashboard_page
+
 schema_view = get_schema_view(
     openapi.Info(
         title="API Documentation",
@@ -33,6 +36,8 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('login/', login_page, name='login-page'),
+    path('dashboard/', dashboard_page, name='dashboard-page'),
     path('api/v1/auth/', include('authentication.urls')),
     path('api/v1/order/', include('order.urls')),
     path('api/v1/delivery/', include('delivery.urls')),
