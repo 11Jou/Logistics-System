@@ -15,6 +15,10 @@ class BuildDeliveryRunSerializer(serializers.Serializer):
     driver_id = serializers.IntegerField()
 
 
+class FailDeliveryStopSerializer(serializers.Serializer):
+    failed_reason = serializers.CharField(required=True, allow_blank=False)
+
+
 class DeliveryStopSerializer(serializers.ModelSerializer):
     order = OrderSerializer(read_only=True)
 
@@ -42,3 +46,4 @@ class DeliveryRunSerializer(serializers.ModelSerializer):
     def get_stops(self, obj):
         stops = obj.deliverystop_set.all().order_by('stop_sequence')
         return DeliveryStopSerializer(stops, many=True).data
+
