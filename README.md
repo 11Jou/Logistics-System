@@ -97,9 +97,9 @@ Authorization: Bearer <access_token>
 
 | Role | Email | Password |
 |------|-------|----------|
-| Manager | `manager@demo.com` | `Demo@1234` |
-| Dispatcher | `dispatcher@demo.com` | `Demo@1234` |
-| Driver | `driver@demo.com` | `Demo@1234` |
+| Manager | `admin@gmail.com` | `1234` |
+| Dispatcher | `dispatcher1@gmail.com` | `test@1234` |
+| Driver | `driver1@gmail.com` | `test@1234` |
 
 **Login**
 
